@@ -21,7 +21,7 @@ home_page.add_purchase(posicao_submit_button, company, date, number_of_shares)
 home_page.show_wallet()
 
 # Cria botao para calcular metricas
-metrics_button = st.button(label="Calcule métricas de carbono")
+metrics_button = st.sidebar.button(label="Calcule métricas de carbono")
 
 # Mostra as metricas calculadas
 home_page.show_metrics(metrics_button)

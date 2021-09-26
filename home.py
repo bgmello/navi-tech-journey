@@ -16,17 +16,28 @@ from helper import get_data
 
 class HomePage:
     def __init__(self):
-        pass
+        st.set_page_config(layout="wide")
 
     @staticmethod
     def show_logo():
         img = Image.open("assets/logo.png")
-        st.image(img)
+        st.sidebar.image(img)
 
     @staticmethod
     def show_wallet():
         if not st.session_state["carteira"].empty:
+            st.write("Resumo da carteira")
             st.dataframe(st.session_state["carteira"])
+
+        else:
+            st.write("Adicione uma posição na sua carteira")
+
+    @staticmethod
+    def show_metrics(metrics_button):
+        if metrics_button:
+            get_bps_time_series(st, st.session_state["carteira"])
+            get_carbon_offset_time_series(st, st.session_state["carteira"])
+            get_intensity_carbon_consumption_time_series(st, st.session_state["carteira"])
 
     @staticmethod
     def initialize_session_variables():
@@ -61,19 +72,18 @@ class HomePage:
                 ).reset_index(drop=True)
 
     def get_position_form(self):
-        with st.form(key="Posicao"):
+        with st.sidebar.form(key="Posicao"):
             st.header("Adicione Posição")
-            col1, col2 = st.columns(2)
             company = st.selectbox(
                 "Escolha a empresa:", options=self.get_companies_ticker()
             )
-            date = col1.date_input(
+            number_of_shares = st.number_input("Número de ações", min_value=1, step=1)
+            date = st.date_input(
                 "Data de compra:",
                 min_value=datetime(2013, 1, 1),
                 max_value=datetime(2020, 12, 31),
                 value=datetime(2013, 1, 1),
             )
-            number_of_shares = col2.number_input("Número de ações", min_value=1, step=1)
             posicao_submit_button = st.form_submit_button(label="Adicione posição")
 
         return company, date, number_of_shares, posicao_submit_button
@@ -81,11 +91,3 @@ class HomePage:
     @staticmethod
     def get_companies_ticker() -> list:
         return get_data()["ticker"].sort_values().unique().tolist()
-
-    @staticmethod
-    def show_metrics(metrics_button):
-        if metrics_button:
-            # st.metric(label="Custo total de offset de carbono", value="R$ 100 Milhões")
-            get_bps_time_series(st.session_state["carteira"])
-            get_carbon_offset_time_series(st.session_state["carteira"])
-            get_intensity_carbon_consumption_time_series(st.session_state["carteira"])

@@ -8,7 +8,7 @@ import streamlit as st
 from company import Wallet
 
 
-def get_bps_time_series(wallet_df: pd.DataFrame) -> None:
+def get_bps_time_series(session, wallet_df: pd.DataFrame) -> None:
 
     wallet = Wallet(wallet_df)
 
@@ -44,13 +44,13 @@ def get_bps_time_series(wallet_df: pd.DataFrame) -> None:
             y="BPS",
             color=alt.value("#F1725E"),
         )
-        .properties(width=700, title="Percentual da carteira em offset de carbono")
+        .properties(width=1200, title="Percentual da carteira em offset de carbono")
     )
 
-    return st.altair_chart(chart)
+    return session.altair_chart(chart)
 
 
-def get_carbon_offset_time_series(wallet_df: pd.DataFrame) -> None:
+def get_carbon_offset_time_series(session, wallet_df: pd.DataFrame) -> None:
 
     wallet = Wallet(wallet_df)
 
@@ -86,13 +86,13 @@ def get_carbon_offset_time_series(wallet_df: pd.DataFrame) -> None:
             y="R$",
             color=alt.value("#F1725E"),
         )
-        .properties(width=700, title="Custo do offset de carbono por ano")
+        .properties(width=1200, title="Custo do offset de carbono por ano")
     )
 
-    return st.altair_chart(chart)
+    return session.altair_chart(chart)
 
 
-def get_intensity_carbon_consumption_time_series(wallet_df: pd.DataFrame) -> None:
+def get_intensity_carbon_consumption_time_series(session, wallet_df: pd.DataFrame) -> None:
 
     wallet = Wallet(wallet_df)
 
@@ -128,7 +128,7 @@ def get_intensity_carbon_consumption_time_series(wallet_df: pd.DataFrame) -> Non
             y="tCO2e/R$",
             color=alt.value("#F1725E"),
         )
-        .properties(width=700, title="Intensidade de consumo de carbono por ano")
+        .properties(width=1200, title="Intensidade de consumo de carbono por ano")
     )
 
-    return st.altair_chart(chart)
+    return session.altair_chart(chart)
