@@ -6,7 +6,7 @@ import streamlit as st
 
 
 def get_carbon_price(date: datetime, currency="brl") -> float:
-    df = pd.read_csv("carbon_price.csv")
+    df = pd.read_csv("exchange_rate.csv")
 
     usd_price = st.session_state["preco_carbono_historico"]
 
