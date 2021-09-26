@@ -110,7 +110,7 @@ class HomePage:
         with st.sidebar.form(key="Remover"):
             st.header("Remova Posição")
             idx = st.number_input("Escolha o índice da posição que você deseja remover",
-                                  min_value=0, step=1, max_value=len(st.session_state["carteira"])-1)
+                                  min_value=0, step=1)
             remove_submit_button = st.form_submit_button(label="Remova posição")
 
         return idx, remove_submit_button
@@ -153,6 +153,8 @@ def app():
 
     # Mostra a carteira
     home_page.show_wallet()
+
+    st.session_state["preco_carbono_historico"] = st.sidebar.number_input(label="Estimativa para o preço da tCO2e em $ para anos anteriores a 2019", min_value=0.0, step=0.1, value=0.0)
 
     # Cria botao para calcular metricas
     metrics_button = st.sidebar.button(label="Calcule métricas de carbono")
