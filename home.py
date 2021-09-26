@@ -89,7 +89,7 @@ class HomePage:
                     ]
                 ).reset_index(drop=True)
 
-    def get_position_form(self):
+    def get_add_position_form(self):
         with st.sidebar.form(key="Posicao"):
             st.header("Adicione Posição")
             company = st.selectbox(
@@ -105,6 +105,19 @@ class HomePage:
             posicao_submit_button = st.form_submit_button(label="Adicione posição")
 
         return company, date, number_of_shares, posicao_submit_button
+
+    def get_remove_position_form(self):
+        with st.sidebar.form(key="Remover"):
+            st.header("Remova Posição")
+            idx = st.number_input("Escolha o índice da posição que você deseja remover",
+                                  min_value=0, step=1, max_value=len(st.session_state["carteira"])-1)
+            remove_submit_button = st.form_submit_button(label="Remova posição")
+
+        return idx, remove_submit_button
+
+    def remove_position(self, remove_submit_button, remove_idx):
+        if remove_submit_button:
+            st.session_state["carteira"] = st.session_state["carteira"].drop(remove_idx).reset_index(drop=True)
 
     @staticmethod
     def get_companies_ticker() -> list:
@@ -124,10 +137,19 @@ def app():
         date,
         number_of_shares,
         posicao_submit_button,
-    ) = home_page.get_position_form()
+    ) = home_page.get_add_position_form()
 
     # Adiciona posicao na carteira
     home_page.add_purchase(posicao_submit_button, company, date, number_of_shares)
+
+    # Pega informacoes de posicao a ser removida
+    if len(st.session_state["carteira"]):
+        (
+            remove_idx,
+            remove_submit_button,
+        ) = home_page.get_remove_position_form()
+        # Remove posicao na carteira
+        home_page.remove_position(remove_submit_button, remove_idx)
 
     # Mostra a carteira
     home_page.show_wallet()
