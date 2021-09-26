@@ -47,7 +47,7 @@ class Company:
         data = get_data()
 
         try:
-            return data.loc[
+            return 1000000*data.loc[
                 data["ticker"].eq(self.ticker) & data["fiscal_year"].eq(date.year),
                 "total_revenues",
             ].iloc[0]
@@ -58,7 +58,7 @@ class Company:
         data = get_data()
 
         try:
-            return data.loc[
+            return 1000000*data.loc[
                 data["ticker"].eq(self.ticker) & data["fiscal_year"].eq(date.year),
                 "EBT",
             ].iloc[0]
@@ -69,7 +69,7 @@ class Company:
         data = get_data()
 
         try:
-            return data.loc[
+            return 1000000*data.loc[
                 data["ticker"].eq(self.ticker) & data["fiscal_year"].eq(date.year),
                 "EBITDA",
             ].iloc[0]
