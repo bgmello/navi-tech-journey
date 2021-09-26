@@ -1,7 +1,8 @@
-import home
-import prediction
 import streamlit as st
 from PIL import Image
+
+import home
+import prediction
 
 PAGES = {
     "Custo de carbono da carteira": home,

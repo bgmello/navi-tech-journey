@@ -47,10 +47,13 @@ class Company:
         data = get_data()
 
         try:
-            return 1000000*data.loc[
-                data["ticker"].eq(self.ticker) & data["fiscal_year"].eq(date.year),
-                "total_revenues",
-            ].iloc[0]
+            return (
+                1000000
+                * data.loc[
+                    data["ticker"].eq(self.ticker) & data["fiscal_year"].eq(date.year),
+                    "total_revenues",
+                ].iloc[0]
+            )
         except IndexError:
             return None
 
@@ -58,10 +61,13 @@ class Company:
         data = get_data()
 
         try:
-            return 1000000*data.loc[
-                data["ticker"].eq(self.ticker) & data["fiscal_year"].eq(date.year),
-                "EBT",
-            ].iloc[0]
+            return (
+                1000000
+                * data.loc[
+                    data["ticker"].eq(self.ticker) & data["fiscal_year"].eq(date.year),
+                    "EBT",
+                ].iloc[0]
+            )
         except IndexError:
             return None
 
@@ -69,10 +75,13 @@ class Company:
         data = get_data()
 
         try:
-            return 1000000*data.loc[
-                data["ticker"].eq(self.ticker) & data["fiscal_year"].eq(date.year),
-                "EBITDA",
-            ].iloc[0]
+            return (
+                1000000
+                * data.loc[
+                    data["ticker"].eq(self.ticker) & data["fiscal_year"].eq(date.year),
+                    "EBITDA",
+                ].iloc[0]
+            )
         except IndexError:
             return None
 
@@ -108,7 +117,7 @@ class Company:
     def get_intensity_of_carbon_consumption(self, date: datetime) -> float:
         if self.get_net_revenue(date) == 0 or self.get_net_revenue(date) is None:
             return 0
-        return self.get_total_emission(date)/self.get_net_revenue(date)
+        return self.get_total_emission(date) / self.get_net_revenue(date)
 
 
 class CompanyShare:

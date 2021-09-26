@@ -6,16 +6,13 @@ from millify import prettify
 
 from company import Company
 from graphics import (
-    get_carbon_offset_by_price_time_series,
-    get_carbon_offset_time_series,
-    get_carbon_price_time_series,
-    get_intensity_carbon_consumption_time_series,
-    get_price_time_series,
-    get_total_emission_time_series,
     get_carbon_offset_by_ebitda_time_series,
     get_carbon_offset_by_ebt_time_series,
+    get_carbon_offset_by_price_time_series,
     get_carbon_offset_by_price_vs_carbon_offset_by_ebitda_scatter_plot,
-)
+    get_carbon_offset_time_series, get_carbon_price_time_series,
+    get_intensity_carbon_consumption_time_series, get_price_time_series,
+    get_total_emission_time_series)
 from helper import get_data
 
 
@@ -98,7 +95,9 @@ class HomePage:
             company = st.selectbox(
                 "Escolha a empresa:", options=self.get_companies_ticker()
             )
-            number_of_shares = st.number_input("Número de ações", min_value=100, step=100)
+            number_of_shares = st.number_input(
+                "Número de ações", min_value=100, step=100
+            )
             date = st.date_input(
                 "Data de compra:",
                 min_value=datetime(2013, 1, 1),
@@ -112,15 +111,20 @@ class HomePage:
     def get_remove_position_form(self):
         with st.sidebar.form(key="Remover"):
             st.header("Remova Posição")
-            idx = st.number_input("Escolha o índice da posição que você deseja remover",
-                                  min_value=0, step=1)
+            idx = st.number_input(
+                "Escolha o índice da posição que você deseja remover",
+                min_value=0,
+                step=1,
+            )
             remove_submit_button = st.form_submit_button(label="Remova posição")
 
         return idx, remove_submit_button
 
     def remove_position(self, remove_submit_button, remove_idx):
         if remove_submit_button:
-            st.session_state["carteira"] = st.session_state["carteira"].drop(remove_idx).reset_index(drop=True)
+            st.session_state["carteira"] = (
+                st.session_state["carteira"].drop(remove_idx).reset_index(drop=True)
+            )
 
     @staticmethod
     def get_companies_ticker() -> list:
@@ -157,7 +161,12 @@ def app():
     # Mostra a carteira
     home_page.show_wallet()
 
-    st.session_state["preco_carbono_historico"] = st.sidebar.number_input(label="Estimativa para o preço da tCO2e em $ para anos anteriores a 2019", min_value=0.0, step=0.1, value=st.session_state["preco_carbono_historico"])
+    st.session_state["preco_carbono_historico"] = st.sidebar.number_input(
+        label="Estimativa para o preço da tCO2e em $ para anos anteriores a 2019",
+        min_value=0.0,
+        step=0.1,
+        value=st.session_state["preco_carbono_historico"],
+    )
 
     # Cria botao para calcular metricas
     metrics_button = st.sidebar.button(label="Calcule métricas de carbono")

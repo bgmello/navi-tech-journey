@@ -1,8 +1,8 @@
-from functools import lru_cache
 from datetime import datetime
-import streamlit as st
+from functools import lru_cache
 
 import pandas as pd
+import streamlit as st
 
 
 def get_carbon_price(date: datetime, currency="brl") -> float:
@@ -11,7 +11,7 @@ def get_carbon_price(date: datetime, currency="brl") -> float:
     usd_price = st.session_state["preco_carbono_historico"]
 
     if currency == "brl":
-        return usd_price*df.set_index("year").loc[date.year, "exchange_rate"]
+        return usd_price * df.set_index("year").loc[date.year, "exchange_rate"]
     return usd_price
 
 
