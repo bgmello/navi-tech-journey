@@ -16,7 +16,7 @@ def get_carbon_offset_by_price_time_series(session, wallet_df: pd.DataFrame) -> 
         {
             "Ano": np.arange(2013, 2021),
             "BPS": [
-                wallet.get_carbon_offset_by_price(datetime(year, 1, 1))
+                10000*wallet.get_carbon_offset_by_price(datetime(year, 1, 1))
                 for year in np.arange(2013, 2021)
             ],
         }
