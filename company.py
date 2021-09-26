@@ -105,6 +105,11 @@ class Company:
 
         return 10000 * (self.get_carbon_offset(date)) / self.get_ebt(date)
 
+    def get_intensity_of_carbon_consumption(self, date: datetime) -> float:
+        if self.get_net_revenue(date) == 0 or self.get_net_revenue(date) is None:
+            return 0
+        return self.get_total_emission(date)/self.get_net_revenue(date)
+
 
 class CompanyShare:
     def __init__(self, ticker, n_shares, start_date):
