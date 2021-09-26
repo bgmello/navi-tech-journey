@@ -31,7 +31,7 @@ class PredictionPage:
     @staticmethod
     def get_companies_ticker() -> list:
         data = get_data()
-        return data.loc[data["fiscal_year"].eq(2020), "ticker"].sort_values().unique().tolist()
+        return data.loc[data["fiscal_year"].eq(2019), "ticker"].sort_values().unique().tolist()
 
     @staticmethod
     def show_predictions(submit_button, company, cagr_revenue, cagr_carbon, carbon_intensity):

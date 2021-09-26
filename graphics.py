@@ -14,10 +14,10 @@ def get_carbon_offset_by_price_time_series(session, wallet_df: pd.DataFrame) -> 
 
     tmp = pd.DataFrame(
         {
-            "Ano": np.arange(2013, 2021),
+            "Ano": np.arange(2013, 2020),
             "BPS": [
                 10000*wallet.get_carbon_offset_by_price(datetime(year, 1, 1))
-                for year in np.arange(2013, 2021)
+                for year in np.arange(2013, 2020)
             ],
         }
     )
@@ -56,10 +56,10 @@ def get_carbon_offset_time_series(session, wallet_df: pd.DataFrame) -> None:
 
     tmp = pd.DataFrame(
         {
-            "Ano": np.arange(2013, 2021),
+            "Ano": np.arange(2013, 2020),
             "R$": [
                 wallet.get_carbon_offset(datetime(year, 1, 1))
-                for year in np.arange(2013, 2021)
+                for year in np.arange(2013, 2020)
             ],
         }
     )
@@ -100,10 +100,10 @@ def get_intensity_carbon_consumption_time_series(
 
     tmp = pd.DataFrame(
         {
-            "Ano": np.arange(2013, 2021),
+            "Ano": np.arange(2013, 2020),
             "tCO2e/Milhões de R$": [
                 1000000*wallet.get_intesity_of_carbon_consumption(datetime(year, 1, 1))
-                for year in np.arange(2013, 2021)
+                for year in np.arange(2013, 2020)
             ],
         }
     )
@@ -142,9 +142,9 @@ def get_price_time_series(session, wallet_df: pd.DataFrame) -> None:
 
     tmp = pd.DataFrame(
         {
-            "Ano": np.arange(2013, 2021),
+            "Ano": np.arange(2013, 2020),
             "R$": [
-                wallet.get_price(datetime(year, 1, 1)) for year in np.arange(2013, 2021)
+                wallet.get_price(datetime(year, 1, 1)) for year in np.arange(2013, 2020)
             ],
         }
     )
@@ -205,10 +205,10 @@ def get_total_emission_time_series(session, wallet_df: pd.DataFrame) -> None:
 
     tmp = pd.DataFrame(
         {
-            "Ano": np.arange(2013, 2021),
+            "Ano": np.arange(2013, 2020),
             "tCO2e": [
                 wallet.get_emission(datetime(year, 1, 1))
-                for year in np.arange(2013, 2021)
+                for year in np.arange(2013, 2020)
             ],
         }
     )
@@ -247,10 +247,10 @@ def get_carbon_offset_by_ebitda_time_series(session, wallet_df: pd.DataFrame) ->
 
     tmp = pd.DataFrame(
         {
-            "Ano": np.arange(2013, 2021),
+            "Ano": np.arange(2013, 2020),
             "BPS": [
                 wallet.get_carbon_offset_by_ebitda(datetime(year, 1, 1))
-                for year in np.arange(2013, 2021)
+                for year in np.arange(2013, 2020)
             ],
         }
     )
@@ -289,10 +289,10 @@ def get_carbon_offset_by_ebt_time_series(session, wallet_df: pd.DataFrame) -> No
 
     tmp = pd.DataFrame(
         {
-            "Ano": np.arange(2013, 2021),
+            "Ano": np.arange(2013, 2020),
             "BPS": [
                 wallet.get_carbon_offset_by_ebt(datetime(year, 1, 1))
-                for year in np.arange(2013, 2021)
+                for year in np.arange(2013, 2020)
             ],
         }
     )
@@ -377,8 +377,8 @@ def get_intensity_carbon_consumption_time_series_forcast(
             "Ano": np.arange(2013, 2025),
             "tCO2e/Milhões de R$": [
                 1000000*company.get_intensity_of_carbon_consumption(datetime(year, 1, 1))
-                for year in np.arange(2013, 2021)
-            ] + 4*[carbon_intensity_forecast]
+                for year in np.arange(2013, 2020)
+            ] + 5*[carbon_intensity_forecast]
         }
     )
 
@@ -416,15 +416,15 @@ def get_total_emission_time_series_forecast(
 
     company = Company(ticker)
 
-    forecast_emissions = [carbon_intensity_forecast*(1+cagr_revenue)**(i+1)*company.get_net_revenue(datetime(2020, 1, 1))/1000000
-                          if company.get_net_revenue(datetime(2020, 1, 1)) is not None else 0 for i in range(4)]
+    forecast_emissions = [carbon_intensity_forecast*(1+cagr_revenue)**(i+1)*company.get_net_revenue(datetime(2019, 1, 1))/1000000
+                          if company.get_net_revenue(datetime(2019, 1, 1)) is not None else 0 for i in range(5)]
 
     tmp = pd.DataFrame(
         {
             "Ano": np.arange(2013, 2025),
             "tCO2e": [
                 company.get_total_emission(datetime(year, 1, 1))
-                for year in np.arange(2013, 2021)
+                for year in np.arange(2013, 2020)
             ] + forecast_emissions
         }
     )
@@ -461,14 +461,14 @@ def get_carbon_offset_time_series_forecast(
     session, ticker: str, cagr_carbon: float
 ) -> None:
 
-    forecast_carbon_offset = [(1+cagr_carbon)**(i+1)*get_carbon_price(datetime(2020, 1, 1), currency="usd") for i in range(4)]
+    forecast_carbon_offset = [(1+cagr_carbon)**(i+1)*get_carbon_price(datetime(2019, 1, 1), currency="usd") for i in range(5)]
 
     tmp = pd.DataFrame(
         {
             "Ano": np.arange(2013, 2025),
             "$/tCO2e": [
                 get_carbon_price(datetime(year, 1, 1), currency="usd")
-                for year in np.arange(2013, 2021)
+                for year in np.arange(2013, 2020)
             ] + forecast_carbon_offset
         }
     )
@@ -506,11 +506,11 @@ def get_carbon_offset_by_price_time_series_forecast(session, ticker: str, cagr_c
 
     company = Company(ticker)
 
-    forecast_carbon_offset = [(1+cagr_carbon)**(i+1)*get_carbon_price(datetime(2020, 1, 1), currency="brl") for i in range(4)]
-    forecast_emissions = [carbon_intensity_forecast*(1+cagr_revenue)**(i+1)*company.get_net_revenue(datetime(2020, 1, 1))/1000000
-                          if company.get_net_revenue(datetime(2020, 1, 1)) is not None else 0 for i in range(4)]
+    forecast_carbon_offset = [(1+cagr_carbon)**(i+1)*get_carbon_price(datetime(2019, 1, 1), currency="brl") for i in range(5)]
+    forecast_emissions = [carbon_intensity_forecast*(1+cagr_revenue)**(i+1)*company.get_net_revenue(datetime(2019, 1, 1))/1000000
+                          if company.get_net_revenue(datetime(2019, 1, 1)) is not None else 0 for i in range(5)]
     forecast_total_carbon_offset = [carbon_offset*emissions for carbon_offset, emissions in zip(forecast_carbon_offset, forecast_emissions)]
-    total_company_price = company.get_price_by_share(datetime(2020, 1, 1))*company.get_number_of_shares(datetime(2020, 1, 1))
+    total_company_price = company.get_price_by_share(datetime(2019, 1, 1))*company.get_number_of_shares(datetime(2019, 1, 1))
     forecast_carbon_offset_by_price = [10000*x for x in forecast_total_carbon_offset/total_company_price]
 
     tmp = pd.DataFrame(
@@ -518,7 +518,7 @@ def get_carbon_offset_by_price_time_series_forecast(session, ticker: str, cagr_c
             "Ano": np.arange(2013, 2025),
             "BPS": [
                 company.get_carbon_offset_by_price(datetime(year, 1, 1))
-                for year in np.arange(2013, 2021)
+                for year in np.arange(2013, 2020)
             ] + forecast_carbon_offset_by_price,
         }
     )
