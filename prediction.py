@@ -1,9 +1,11 @@
 import streamlit as st
 
-from graphics import (get_carbon_offset_by_price_time_series_forecast,
-                      get_carbon_offset_time_series_forecast,
-                      get_intensity_carbon_consumption_time_series_forcast,
-                      get_total_emission_time_series_forecast)
+from graphics import (
+    get_carbon_offset_by_price_time_series_forecast,
+    get_carbon_offset_time_series_forecast,
+    get_intensity_carbon_consumption_time_series_forcast,
+    get_total_emission_time_series_forecast,
+)
 from helper import get_data
 
 

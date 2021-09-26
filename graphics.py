@@ -273,6 +273,8 @@ def get_carbon_offset_by_ebitda_time_series(session, wallet_df: pd.DataFrame) ->
         }
     )
 
+    print(tmp)
+
     chart = (
         alt.Chart(tmp)
         .mark_area(
@@ -314,6 +316,8 @@ def get_carbon_offset_by_ebt_time_series(session, wallet_df: pd.DataFrame) -> No
             ],
         }
     )
+
+    print(tmp)
 
     chart = (
         alt.Chart(tmp)

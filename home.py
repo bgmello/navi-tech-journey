@@ -1,6 +1,6 @@
-'''
+"""
 Implementa a primeira aba do sistema, com analise de uma carteira de acoes
-'''
+"""
 from datetime import datetime
 
 import pandas as pd
@@ -13,26 +13,30 @@ from graphics import (
     get_carbon_offset_by_ebt_time_series,
     get_carbon_offset_by_price_time_series,
     get_carbon_offset_by_price_vs_carbon_offset_by_ebitda_scatter_plot,
-    get_carbon_offset_time_series, get_carbon_price_time_series,
-    get_intensity_carbon_consumption_time_series, get_price_time_series,
-    get_total_emission_time_series)
+    get_carbon_offset_time_series,
+    get_carbon_price_time_series,
+    get_intensity_carbon_consumption_time_series,
+    get_price_time_series,
+    get_total_emission_time_series,
+)
 from helper import get_data
 
 
 class HomePage:
-    '''
+    """
     Classe que representa a pagina de analise de carteira de acoes
-    '''
+    """
+
     def __init__(self):
         pass
 
     @staticmethod
     def show_wallet() -> None:
-        '''
+        """
         Metodo para mostrar a carteira do usuario como um dataframe.
         So sera mostrada se o usuario adicionar pelo menos um ativo.
         Persiste nas sessoes do sistema.
-        '''
+        """
 
         if not st.session_state["carteira"].empty:
             st.write("Resumo da carteira")
@@ -43,10 +47,10 @@ class HomePage:
 
     @staticmethod
     def show_metrics(metrics_button) -> None:
-        '''
+        """
         Mostra as metricas da carteira do usuario.
         Recebe o botao de submissao para identificar se o usuario clicou.
-        '''
+        """
         if metrics_button:
             with st.expander("Métricas de carbono"):
                 col1, col2 = st.columns(2)
@@ -72,13 +76,26 @@ class HomePage:
 
     @staticmethod
     def initialize_session_variables():
-        '''
+        """
         Inicializacao das variaveis de sessao. Temos duas variaveis:
             - A carteira do usuario
             - A estimativa do preco do carbono
-        '''
+        """
         if "carteira" not in st.session_state:
-            st.session_state["carteira"] = pd.DataFrame()
+            tmp = pd.read_csv("fake_portfolio.csv")
+            tmp["DATA DA COMPRA"] = (
+                tmp["DATA DA COMPRA"].pipe(pd.to_datetime).dt.strftime("%d/%m/%Y")
+            )
+            tmp["PREÇO TOTAL"] = tmp[
+                ["TICKER", "DATA DA COMPRA", "NÚMERO DE AÇÕES"]
+            ].apply(
+                lambda row: Company(row["TICKER"]).get_price_by_share(
+                    datetime.strptime(row["DATA DA COMPRA"], "%d/%m/%Y")
+                )
+                * row["NÚMERO DE AÇÕES"],
+                axis=1,
+            )
+            st.session_state["carteira"] = tmp
 
         if "preco_carbono_historico" not in st.session_state:
             st.session_state["preco_carbono_historico"] = 0.0
@@ -87,9 +104,9 @@ class HomePage:
     def add_purchase(
         posicao_submit_button: bool, ticker: str, date: datetime, n_shares: int
     ) -> pd.DataFrame:
-        '''
+        """
         Adiciona uma posicao na carteira do usuario
-        '''
+        """
         if posicao_submit_button:
             company = Company(ticker)
             price = company.get_price_by_share(date)
@@ -114,9 +131,9 @@ class HomePage:
                 ).reset_index(drop=True)
 
     def get_add_position_form(self):
-        '''
+        """
         Gera o form de adicao de posicao
-        '''
+        """
         with st.sidebar.form(key="Posicao"):
             st.header("Adicione Posição")
             company = st.selectbox(
@@ -137,9 +154,9 @@ class HomePage:
 
     @staticmethod
     def get_remove_position_form():
-        '''
+        """
         Gera o form para remove a posicao do usuario
-        '''
+        """
         with st.sidebar.form(key="Remover"):
             st.header("Remova Posição")
             idx = st.number_input(
@@ -153,9 +170,9 @@ class HomePage:
 
     @staticmethod
     def remove_position(remove_submit_button, remove_idx):
-        '''
+        """
         Remove uma posicao da carteira
-        '''
+        """
         if remove_submit_button:
             st.session_state["carteira"] = (
                 st.session_state["carteira"].drop(remove_idx).reset_index(drop=True)
@@ -163,9 +180,9 @@ class HomePage:
 
     @staticmethod
     def get_companies_ticker() -> list:
-        '''
+        """
         Retorna os tickers de todas as empresas no nosso banco de dados
-        '''
+        """
         return get_data()["ticker"].sort_values().unique().tolist()
 
 
