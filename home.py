@@ -95,7 +95,7 @@ class HomePage:
             company = st.selectbox(
                 "Escolha a empresa:", options=self.get_companies_ticker()
             )
-            number_of_shares = st.number_input("Número de ações", min_value=1, step=1)
+            number_of_shares = st.number_input("Número de ações", min_value=100, step=100)
             date = st.date_input(
                 "Data de compra:",
                 min_value=datetime(2013, 1, 1),
