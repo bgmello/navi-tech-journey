@@ -1,16 +1,27 @@
 import streamlit as st
-import utils
 
-utils.initialize_session_variables()
+from home import HomePage
 
-utils.show_logo()
+# Instancia classe da pagina home
+home_page = HomePage()
 
-company, date, number_of_shares, posicao_submit_button = utils.get_position_form()
+# Inicializa variaveis da sessao
+home_page.initialize_session_variables()
 
-utils.add_purchase(posicao_submit_button, company, date, number_of_shares)
+# Mostra logo da navi
+home_page.show_logo()
 
-utils.show_wallet()
+# Pega informacoes de posicao da carteira a partir do form
+company, date, number_of_shares, posicao_submit_button = home_page.get_position_form()
 
-carbon_credit_button = st.button(label="Calcule métricas de carbono")
+# Adiciona posicao na carteira
+home_page.add_purchase(posicao_submit_button, company, date, number_of_shares)
 
-utils.calculate_carbon_credit(carbon_credit_button)
+# Mostra a carteira
+home_page.show_wallet()
+
+# Cria botao para calcular metricas
+metrics_button = st.button(label="Calcule métricas de carbono")
+
+# Mostra as metricas calculadas
+home_page.show_metrics(metrics_button)
