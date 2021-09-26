@@ -62,6 +62,9 @@ class HomePage:
         if "carteira" not in st.session_state:
             st.session_state["carteira"] = pd.DataFrame()
 
+        if "preco_carbono_historico" not in st.session_state:
+            st.session_state["preco_carbono_historico"] = 0.0
+
     @staticmethod
     def add_purchase(
         posicao_submit_button: bool, ticker: str, date: datetime, n_shares: int
@@ -154,7 +157,7 @@ def app():
     # Mostra a carteira
     home_page.show_wallet()
 
-    st.session_state["preco_carbono_historico"] = st.sidebar.number_input(label="Estimativa para o preço da tCO2e em $ para anos anteriores a 2019", min_value=0.0, step=0.1, value=0.0)
+    st.session_state["preco_carbono_historico"] = st.sidebar.number_input(label="Estimativa para o preço da tCO2e em $ para anos anteriores a 2019", min_value=0.0, step=0.1, value=st.session_state["preco_carbono_historico"])
 
     # Cria botao para calcular metricas
     metrics_button = st.sidebar.button(label="Calcule métricas de carbono")
