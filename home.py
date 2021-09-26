@@ -3,7 +3,6 @@ from datetime import datetime
 import pandas as pd
 import streamlit as st
 from millify import prettify
-from PIL import Image
 
 from company import Company
 from graphics import (
@@ -16,12 +15,7 @@ from helper import get_data
 
 class HomePage:
     def __init__(self):
-        st.set_page_config(layout="wide")
-
-    @staticmethod
-    def show_logo():
-        img = Image.open("assets/logo.png")
-        st.sidebar.image(img)
+        pass
 
     @staticmethod
     def show_wallet():
@@ -91,3 +85,26 @@ class HomePage:
     @staticmethod
     def get_companies_ticker() -> list:
         return get_data()["ticker"].sort_values().unique().tolist()
+
+
+def app():
+    # Instancia classe da pagina home
+    home_page = HomePage()
+
+    # Inicializa variaveis da sessao
+    home_page.initialize_session_variables()
+
+    # Pega informacoes de posicao da carteira a partir do form
+    company, date, number_of_shares, posicao_submit_button = home_page.get_position_form()
+
+    # Adiciona posicao na carteira
+    home_page.add_purchase(posicao_submit_button, company, date, number_of_shares)
+
+    # Mostra a carteira
+    home_page.show_wallet()
+
+    # Cria botao para calcular metricas
+    metrics_button = st.sidebar.button(label="Calcule métricas de carbono")
+
+    # Mostra as metricas calculadas
+    home_page.show_metrics(metrics_button)
