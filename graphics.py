@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from company import Wallet, Company
-from helper import get_carbon_price
+from helper import get_carbon_price, get_data
 
 
 def get_carbon_offset_by_price_time_series(session, wallet_df: pd.DataFrame) -> None:
@@ -334,11 +334,11 @@ def get_carbon_offset_by_price_vs_carbon_offset_by_ebitda_scatter_plot(
     tmp = pd.DataFrame(
         {
             "Custo de offset sobre preço": [
-                share.company.get_carbon_offset_by_price(datetime(2020, 1, 1))
+                share.company.get_carbon_offset_by_price(datetime(2019, 1, 1))
                 for share in wallet.companies_shares
             ],
             "Custo de offset sobre EBITDA": [
-                share.company.get_carbon_offset_by_ebitda(datetime(2020, 1, 1))
+                share.company.get_carbon_offset_by_ebitda(datetime(2019, 1, 1))
                 for share in wallet.companies_shares
             ],
             "Ticker": [share.company.ticker for share in wallet.companies_shares],
@@ -549,3 +549,52 @@ def get_carbon_offset_by_price_time_series_forecast(session, ticker: str, cagr_c
     )
 
     return session.altair_chart(chart)
+
+def get_carbon_offset_by_price_time_series_forecast(session, ticker: str) -> None:
+
+    company = Company(ticker)
+
+    forecast_carbon_offset = [(1+cagr_carbon)**(i+1)*get_carbon_price(datetime(2020, 1, 1), currency="brl") for i in range(4)]
+    forecast_emissions = [carbon_intensity_forecast*(1+cagr_revenue)**(i+1)*company.get_net_revenue(datetime(2020, 1, 1))/1000000
+                          if company.get_net_revenue(datetime(2020, 1, 1)) is not None else 0 for i in range(4)]
+    forecast_total_carbon_offset = [carbon_offset*emissions for carbon_offset, emissions in zip(forecast_carbon_offset, forecast_emissions)]
+    total_company_price = company.get_price_by_share(datetime(2020, 1, 1))*company.get_number_of_shares(datetime(2020, 1, 1))
+    forecast_carbon_offset_by_price = [10000*x for x in forecast_total_carbon_offset/total_company_price]
+
+    tmp = pd.DataFrame(
+        {
+            "Ano": np.arange(2013, 2025),
+            "BPS": [
+                company.get_carbon_offset_by_price(datetime(year, 1, 1))
+                for year in np.arange(2013, 2021)
+            ] + forecast_carbon_offset_by_price,
+        }
+    )
+
+    chart = (
+        alt.Chart(tmp)
+        .mark_area(
+            line={"color": "#F1725E"},
+            color=alt.Gradient(
+                gradient="linear",
+                stops=[
+                    alt.GradientStop(color="white", offset=0),
+                    alt.GradientStop(color="#F1725E", offset=1),
+                ],
+                x1=1,
+                x2=1,
+                y1=1,
+                y2=0,
+            ),
+            point=True,
+        )
+        .encode(
+            x=alt.X("Ano", axis=alt.Axis(tickMinStep=1, labelAngle=45)),
+            y="BPS",
+            color=alt.value("#F1725E"),
+        )
+        .properties(width=600, title="Custo do offset de carbono pelo preço da ação")
+    )
+
+    return session.altair_chart(chart)
+
