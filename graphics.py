@@ -249,7 +249,7 @@ def get_carbon_offset_by_ebitda_time_series(session, wallet_df: pd.DataFrame) ->
         {
             "Ano": np.arange(2013, 2020),
             "BPS": [
-                wallet.get_carbon_offset_by_ebitda(datetime(year, 1, 1))
+                10000*wallet.get_carbon_offset_by_ebitda(datetime(year, 1, 1))
                 for year in np.arange(2013, 2020)
             ],
         }
@@ -291,7 +291,7 @@ def get_carbon_offset_by_ebt_time_series(session, wallet_df: pd.DataFrame) -> No
         {
             "Ano": np.arange(2013, 2020),
             "BPS": [
-                wallet.get_carbon_offset_by_ebt(datetime(year, 1, 1))
+                10000*wallet.get_carbon_offset_by_ebt(datetime(year, 1, 1))
                 for year in np.arange(2013, 2020)
             ],
         }
