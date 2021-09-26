@@ -251,10 +251,16 @@ class Wallet:
         return self.get_emission(date) / revenue if revenue != 0 else 0
 
     def get_carbon_offset_by_price(self, date: datetime) -> float:
+        if self.get_price(date) == 0:
+            return 0
         return self.get_carbon_offset(date) / self.get_price(date)
 
     def get_carbon_offset_by_ebitda(self, date: datetime) -> float:
+        if self.get_ebitda(date) == 0:
+            return 0
         return self.get_carbon_offset(date) / self.get_ebitda(date)
 
     def get_carbon_offset_by_ebt(self, date: datetime) -> float:
+        if self.get_ebt(date) == 0:
+            return 0
         return self.get_carbon_offset(date) / self.get_ebt(date)

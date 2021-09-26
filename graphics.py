@@ -347,6 +347,9 @@ def get_carbon_offset_by_price_vs_carbon_offset_by_ebitda_scatter_plot(
 
     tmp = tmp[tmp["Custo de offset sobre EBITDA"].ne(0)]
 
+    if len(tmp) == 0:
+        return
+
     chart = (
         alt.Chart(tmp)
         .mark_circle(size=60)
