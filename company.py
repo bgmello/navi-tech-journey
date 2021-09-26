@@ -10,7 +10,7 @@ class Company:
 
         self.ticker = ticker
 
-    def get_price(self, date: datetime) -> float:
+    def get_price_by_share(self, date: datetime) -> float:
         data = get_data()
 
         try:
@@ -30,7 +30,7 @@ class Company:
                 "emissions",
             ].iloc[0]
         except IndexError:
-            return None
+            return 0
 
     def get_number_of_shares(self, date: datetime) -> int:
         data = get_data()
@@ -49,20 +49,61 @@ class Company:
         try:
             return data.loc[
                 data["ticker"].eq(self.ticker) & data["fiscal_year"].eq(date.year),
-                "total_revenue",
+                "total_revenues",
             ].iloc[0]
         except IndexError:
             return None
 
-    def get_carbon_offset_by_share(self, date: datetime) -> float:
+    def get_ebt(self, date: datetime) -> float:
+        data = get_data()
+
+        try:
+            return data.loc[
+                data["ticker"].eq(self.ticker) & data["fiscal_year"].eq(date.year),
+                "EBT",
+            ].iloc[0]
+        except IndexError:
+            return None
+
+    def get_ebitda(self, date: datetime) -> float:
+        data = get_data()
+
+        try:
+            return data.loc[
+                data["ticker"].eq(self.ticker) & data["fiscal_year"].eq(date.year),
+                "EBITDA",
+            ].iloc[0]
+        except IndexError:
+            return None
+
+    def get_carbon_offset(self, date: datetime) -> float:
+        if self.get_total_emission(date) is None:
+            return 0
+
+        return get_carbon_price(date) * self.get_total_emission(date)
+
+    def get_carbon_offset_by_price(self, date: datetime) -> float:
+        if self.get_price_by_share(date) is None:
+            return 0
         return (
-            get_carbon_price(date)
-            * self.get_total_emission(date)
-            / self.get_number_of_shares(date)
+            10000
+            * self.get_carbon_offset(date)
+            / (self.get_price_by_share(date) * self.get_number_of_shares(date))
         )
 
-    def get_bps_carbon_offset(self, date: datetime) -> float:
-        return 10000 * self.get_carbon_offset_by_share(date) / self.get_price(date)
+    def get_carbon_offset_by_ebitda(self, date: datetime) -> float:
+
+        if self.get_ebitda(date) is None or self.get_ebitda(date) == 0:
+            return 0
+
+        return 10000 * (self.get_carbon_offset(date)) / self.get_ebitda(date)
+
+    def get_carbon_offset_by_ebt(self, date: datetime) -> float:
+
+        if self.get_ebt(date) is None or self.get_ebt(date) == 0:
+            return 0
+
+        return 10000 * (self.get_carbon_offset(date)) / self.get_ebt(date)
 
 
 class CompanyShare:
@@ -72,38 +113,44 @@ class CompanyShare:
         self.company = Company(ticker)
         self.start_date = start_date
 
-    def get_share_on_emission(self, date: datetime) -> float:
-        if date < self.start_date:
+    def get_share_on_company(self, date: datetime) -> float:
+        if (
+            date.year < self.start_date.year
+            or self.company.get_number_of_shares(date) is None
+        ):
             return 0
 
-        return (
-            self.company.get_total_emission(date)
-            * self.n_shares
-            / self.company.get_number_of_shares(date)
-        )
-
-    def get_share_on_revenue(self, date: datetime) -> float:
-        if date < self.start_date:
-            return 0
-
-        return (
-            self.company.get_net_revenue(date)
-            * self.n_shares
-            / self.company.get_number_of_shares(date)
-        )
+        return self.n_shares / self.company.get_number_of_shares(date)
 
     def get_price(self, date: datetime) -> float:
-        return self.company.get_price(date)
-
-    def get_bps_carbon_offset(self, date: datetime) -> float:
-        if date < self.start_date:
+        if (
+            date.year < self.start_date.year
+            or self.company.get_price_by_share(date) is None
+        ):
             return 0
-        return self.company.get_bps_carbon_offset(date)
 
-    def get_total_carbon_offset(self, date: datetime) -> float:
-        if date < self.start_date:
+        return self.company.get_price_by_share(date) * self.n_shares
+
+    def get_share_on_emission(self, date: datetime) -> float:
+        return self.company.get_total_emission(date) * self.get_share_on_company(date)
+
+    def get_share_on_revenue(self, date: datetime) -> float:
+        if self.company.get_net_revenue(date) is None:
             return 0
-        return self.company.get_carbon_offset_by_share(date) * self.n_shares
+        return self.company.get_net_revenue(date) * self.get_share_on_company(date)
+
+    def get_share_on_ebitda(self, date: datetime) -> float:
+        if self.company.get_ebitda(date) is None:
+            return 0
+        return self.company.get_ebitda(date) * self.get_share_on_company(date)
+
+    def get_share_on_ebt(self, date: datetime) -> float:
+        if self.company.get_ebt(date) is None:
+            return 0
+        return self.company.get_ebt(date) * self.get_share_on_company(date)
+
+    def get_share_on_carbon_offset(self, date: datetime) -> float:
+        return self.company.get_carbon_offset(date) * self.get_share_on_company(date)
 
 
 class Wallet:
@@ -120,20 +167,17 @@ class Wallet:
                 )
             )
 
-    def get_bps_carbon_offset(self, date: datetime) -> float:
-        total_value = sum(
-            filter(
-                lambda x: x is not None,
-                map(lambda x: x.get_price(date), self.companies_shares),
-            ),
-            0,
-        )
+    def get_price(self, date: datetime) -> float:
+        return sum(map(lambda x: x.get_price(date), self.companies_shares))
+
+    def get_carbon_offset(self, date: datetime) -> float:
+        total_value = self.get_price(date)
 
         return sum(
             map(
                 lambda x: (
-                    x.get_bps_carbon_offset(date) * x.get_price(date) / total_value
-                    if x.get_price(date) is not None
+                    x.get_share_on_carbon_offset(date) * x.get_price(date) / total_value
+                    if x.get_price(date) is not None and total_value != 0
                     else 0
                 ),
                 self.companies_shares,
@@ -141,19 +185,76 @@ class Wallet:
             0,
         )
 
-    def get_total_carbon_offset(self, date: datetime) -> float:
+    def get_emission(self, date: datetime) -> float:
+        total_value = self.get_price(date)
+
         return sum(
-            map(lambda x: x.get_total_carbon_offset(date), self.companies_shares)
+            map(
+                lambda x: (
+                    x.get_share_on_emission(date) * x.get_price(date) / total_value
+                    if x.get_price(date) is not None and total_value != 0
+                    else 0
+                ),
+                self.companies_shares,
+            ),
+            0,
+        )
+
+    def get_revenue(self, date: datetime) -> float:
+        total_value = self.get_price(date)
+
+        return sum(
+            map(
+                lambda x: (
+                    x.get_share_on_revenue(date) * x.get_price(date) / total_value
+                    if x.get_price(date) is not None and total_value != 0
+                    else 0
+                ),
+                self.companies_shares,
+            ),
+            0,
+        )
+
+    def get_ebitda(self, date: datetime) -> float:
+        total_value = self.get_price(date)
+
+        return sum(
+            map(
+                lambda x: (
+                    x.get_share_on_ebitda(date) * x.get_price(date) / total_value
+                    if x.get_price(date) is not None and total_value != 0
+                    else 0
+                ),
+                self.companies_shares,
+            ),
+            0,
+        )
+
+    def get_ebt(self, date: datetime) -> float:
+        total_value = self.get_price(date)
+
+        return sum(
+            map(
+                lambda x: (
+                    x.get_share_on_ebitda(date) * x.get_price(date) / total_value
+                    if x.get_price(date) is not None and total_value != 0
+                    else 0
+                ),
+                self.companies_shares,
+            ),
+            0,
         )
 
     def get_intesity_of_carbon_consumption(self, date: datetime) -> float:
-        revenue = sum(
-            map(lambda x: x.get_share_on_revenue(date), self.companies_shares)
-        )
+        revenue = self.get_revenue(date)
 
-        if revenue == 0:
-            return 0
+        return self.get_emission(date) / revenue if revenue != 0 else 0
 
-        return sum(
-            map(lambda x: x.get_share_on_emission(date), self.companies_shares)
-        ) / sum(map(lambda x: x.get_share_on_revenue(date), self.companies_shares))
+    def get_carbon_offset_by_price(self, date: datetime) -> float:
+        return self.get_carbon_offset(date) / self.get_price(date)
+
+    def get_carbon_offset_by_ebitda(self, date: datetime) -> float:
+        return self.get_carbon_offset(date) / self.get_ebitda(date)
+
+    def get_carbon_offset_by_ebt(self, date: datetime) -> float:
+        return self.get_carbon_offset(date) / self.get_ebt(date)

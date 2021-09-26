@@ -6,9 +6,15 @@ from millify import prettify
 
 from company import Company
 from graphics import (
-    get_bps_time_series,
+    get_carbon_offset_by_price_time_series,
     get_carbon_offset_time_series,
+    get_carbon_price_time_series,
     get_intensity_carbon_consumption_time_series,
+    get_price_time_series,
+    get_total_emission_time_series,
+    get_carbon_offset_by_ebitda_time_series,
+    get_carbon_offset_by_ebt_time_series,
+    get_carbon_offset_by_price_vs_carbon_offset_by_ebitda_scatter_plot,
 )
 from helper import get_data
 
@@ -29,9 +35,27 @@ class HomePage:
     @staticmethod
     def show_metrics(metrics_button):
         if metrics_button:
-            get_bps_time_series(st, st.session_state["carteira"])
-            get_carbon_offset_time_series(st, st.session_state["carteira"])
-            get_intensity_carbon_consumption_time_series(st, st.session_state["carteira"])
+            with st.expander("Métricas de carbono"):
+                col1, col2 = st.columns(2)
+                get_carbon_offset_by_price_time_series(
+                    col1, st.session_state["carteira"]
+                )
+                get_carbon_offset_time_series(col2, st.session_state["carteira"])
+                get_carbon_price_time_series(col1, st.session_state["carteira"])
+                get_total_emission_time_series(col2, st.session_state["carteira"])
+            with st.expander("Métricas operacionais"):
+                col1, col2 = st.columns(2)
+                get_intensity_carbon_consumption_time_series(
+                    col1, st.session_state["carteira"]
+                )
+                get_price_time_series(col2, st.session_state["carteira"])
+                get_carbon_offset_by_ebitda_time_series(
+                    col1, st.session_state["carteira"]
+                )
+                get_carbon_offset_by_ebt_time_series(col2, st.session_state["carteira"])
+                get_carbon_offset_by_price_vs_carbon_offset_by_ebitda_scatter_plot(
+                    st, st.session_state["carteira"]
+                )
 
     @staticmethod
     def initialize_session_variables():
@@ -44,7 +68,7 @@ class HomePage:
     ) -> pd.DataFrame:
         if posicao_submit_button:
             company = Company(ticker)
-            price = company.get_price(date)
+            price = company.get_price_by_share(date)
             if price is None:
                 st.write("Posição não pode ser adicionada por falta de dados")
 
@@ -95,7 +119,12 @@ def app():
     home_page.initialize_session_variables()
 
     # Pega informacoes de posicao da carteira a partir do form
-    company, date, number_of_shares, posicao_submit_button = home_page.get_position_form()
+    (
+        company,
+        date,
+        number_of_shares,
+        posicao_submit_button,
+    ) = home_page.get_position_form()
 
     # Adiciona posicao na carteira
     home_page.add_purchase(posicao_submit_button, company, date, number_of_shares)
