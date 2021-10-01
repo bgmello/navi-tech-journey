@@ -166,6 +166,12 @@ class CompanyShare:
         return self.company.get_ebt(date) * self.get_share_on_company(date)
 
     def get_share_on_carbon_offset(self, date: datetime) -> float:
+        if date.year == 2019:
+            print(self.company.ticker)
+            print(self.company.get_carbon_offset(date))
+            print(self.get_share_on_company(date))
+            print(self.company.get_carbon_offset(date) * self.get_share_on_company(date))
+
         return self.company.get_carbon_offset(date) * self.get_share_on_company(date)
 
 
@@ -196,7 +202,6 @@ class Wallet:
                     if (
                         not pd.isna(x.get_price(date))
                         and total_value != 0
-                        and not pd.isna(x.get_share_on_ebitda(date))
                     )
                     else 0
                 ),
@@ -277,7 +282,11 @@ class Wallet:
     def get_carbon_offset_by_price(self, date: datetime) -> float:
         if self.get_price(date) == 0:
             return 0
-        return self.get_carbon_offset(date) / self.get_price(date)
+
+        total_value = self.get_price(date)
+
+        return sum(map(lambda x: (x.company.get_carbon_offset_by_price(date)*x.get_price(date)/total_value), self.companies_shares))
+        #return self.get_carbon_offset(date) / self.get_price(date)
 
     def get_carbon_offset_by_ebitda(self, date: datetime) -> float:
         if self.get_ebitda(date) == 0:
